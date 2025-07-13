@@ -29,27 +29,21 @@ A fully functional travel assistant chatbot built using **AWS Lex V2**, **Lambda
 
 ---
 
-## 🖼️ Screenshots
-
-### Chatbot UI
-![Chatbot UI](./screenshots/chatbot-ui-home.png)
-
-### Bot Interaction Example
-![Interaction](./screenshots/chatbot-demo-interaction.png)
-
-### Mobile View
-![Mobile](./screenshots/chatbot-mobile-view.png)
-
----
-
 ## 🛠️ How to Use
 
 1. Visit the [Live Demo](http://myhotelchatbotfrontend.s3-website-ap-southeast-1.amazonaws.com)
-2. Type your query like “Book a hotel” or “Find rooms in Delhi”
+2. Type your query like “Book a hotel” or “reserve a hotel”
 3. Interact with the bot in real-time
 4. Hosted via S3 with AWS-powered backend
 
 ---
 
-## 📁 Folder Structure
 
+---
+
+## 👩‍💻 Author
+
+**Shelly Kashyap**  
+Customer Experience @Amazon  
+
+---
