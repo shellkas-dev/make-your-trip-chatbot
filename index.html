@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MakeYourTrip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('https://images.unsplash.com/photo-1526772662000-3f88f10405ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .floating-icon {
+      position: absolute;
+      width: 60px;
+      opacity: 0.7;
+      animation: float 20s linear infinite;
+    }
+
+    .plane {
+      top: 10%;
+      left: -80px;
+      animation-delay: 0s;
+    }
+
+    .globe {
+      bottom: 5%;
+      left: -100px;
+      animation-delay: 10s;
+    }
+
+    @keyframes float {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(120vw); }
+    }
+
+    .chat-container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-header {
+      background: linear-gradient(to right, #ff4e50, #f9d423);
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .chat-log {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: url('https://www.transparenttextures.com/patterns/pink-dust.png');
+      background-color: #fff7f7;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 20px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      font-size: 15px;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #d0f0fd;
+      color: #333;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: #ffe2e2;
+      color: #333;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      border-radius: 0;
+    }
+
+    .chat-input button {
+      background: #ff4e50;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+
+    .chat-input button:hover {
+      background: #e23c3f;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating icons -->
+  <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Airplane" class="floating-icon plane">
+  <img src="https://cdn-icons-png.flaticon.com/512/1040/1040982.png" alt="Globe" class="floating-icon globe">
+
+  <div class="chat-container">
+    <div class="chat-header">MakeYourTrip</div>
+    <div id="chat-log" class="chat-log"></div>
+    <div class="chat-input">
+      <input type="text" id="user-message" placeholder="Type your message...">
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+
+  <!-- AWS SDK -->
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1157.0.min.js"></script>
+  <script>
+    const config = {
+      botAliasId: 'TSTALIASID',
+      botId: 'AOJDXR4NQH',
+      localeId: 'en_US',
+      region: 'ap-southeast-1',
+      identityPoolId: 'ap-southeast-1:b9fc80d4-0c71-4aff-9987-7cb2a5bd7a7d'
+    };
+
+    AWS.config.region = config.region;
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: config.identityPoolId
+    });
+
+    const lexruntime = new AWS.LexRuntimeV2();
+    const chatLog = document.getElementById('chat-log');
+    const userInput = document.getElementById('user-message');
+    const sendButton = document.getElementById('send-button');
+
+    const botSounds = [
+      '💬', '✈️', '🌍', '🏖️', '🧳', '🎉'
+    ];
+
+    function addMessage(sender, text) {
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      div.textContent = text;
+      chatLog.appendChild(div);
+      chatLog.scrollTop = chatLog.scrollHeight;
+
+      if (sender === 'bot') {
+        const emoji = botSounds[Math.floor(Math.random() * botSounds.length)];
+        const audio = new Audio('https://www.myinstants.com/media/sounds/pop-up-off.mp3');
+        audio.volume = 0.2;
+        audio.play();
+        div.textContent += ' ' + emoji;
+      }
+    }
+
+    async function postMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      addMessage('user', text);
+      userInput.value = '';
+
+      const params = {
+        botId: config.botId,
+        botAliasId: config.botAliasId,
+        localeId: config.localeId,
+        sessionId: 'guest-user-session',
+        text
+      };
+
+      try {
+        const response = await lexruntime.recognizeText(params).promise();
+        const messages = response.messages;
+        if (messages && messages.length > 0) {
+          messages.forEach(m => addMessage('bot', m.content));
+        } else {
+          addMessage('bot', '(No response)');
+        }
+      } catch (err) {
+        console.error(err);
+        addMessage('bot', 'Error: ' + (err.message || 'Failed to respond.'));
+      }
+    }
+
+    sendButton.addEventListener('click', postMessage);
+    userInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') postMessage();
+    });
+  </script>
+</body>
+</html>
